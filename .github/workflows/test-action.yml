@@ -1,0 +1,86 @@
+name: test-kubepug
+
+on: [pull_request]
+
+jobs:
+  test_kubepug_action:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: none
+      checks: none
+      contents: none
+      deployments: none
+      issues: none
+      packages: none
+      pull-requests: none
+      repository-projects: none
+      security-events: none
+      statuses: none
+    name: Install kubepug and test presence in path
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install kubepug
+      uses: ./
+    - name: Check install!
+      run: kubepug --version
+    - name: Check root directory
+      run: |
+        if [[ $(git diff --stat) != '' ]]; then
+          echo 'should be clean'
+          exit 1
+        else
+          exit 0
+        fi
+
+  test_kubepug_action_custom:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: none
+      checks: none
+      contents: none
+      deployments: none
+      issues: none
+      packages: none
+      pull-requests: none
+      repository-projects: none
+      security-events: none
+      statuses: none
+    name: Install Custom kubepug and test presence in path
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install kubepug
+      uses: ./
+      with:
+        kubepug-release: '1.2.0'
+    - name: Check install!
+      run: kubepug --version
+    - name: Check root directory
+      run: |
+        if [[ $(git diff --stat) != '' ]]; then
+          echo 'should be clean'
+          exit 1
+        else
+          exit 0
+        fi
+
+  test_kubepug_action_wrong:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: none
+      checks: none
+      contents: none
+      deployments: none
+      issues: none
+      packages: none
+      pull-requests: none
+      repository-projects: none
+      security-events: none
+      statuses: none
+    name: Try to install a wrong kubepug
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install kubepug
+      uses: ./
+      with:
+        kubepug-release: 'honk'
+      continue-on-error: true

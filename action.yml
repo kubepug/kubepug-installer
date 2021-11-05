@@ -1,0 +1,44 @@
+name: install-kubepug
+description: 'Install Kubepug and put it on your path'
+branding:
+  icon: 'package'
+  color: 'blue'
+
+inputs:
+  kubepug-release:
+    description: 'Kubepug release version to use in the actions.'
+    required: false
+    default: '1.2.2'
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        trap "popd" EXIT
+
+        mkdir -p $HOME/.kubepug
+        pushd $HOME/.v
+
+        semver='^([0-9]+\.){0,2}(\*|[0-9]+)$'
+        if [[ ${{ inputs.kubepug-release }} =~ $semver ]]; then
+          echo "INFO: Custom Kubepug Version ${{ inputs.kubepug-release }}"
+        else
+          echo "ERROR: Unable to validate Kubepug version: '${{ inputs.kubepug-release }}'"
+          exit 1
+        fi
+
+        wget https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/kubepug_linux_amd64.tar.gz
+        wget https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/kubepug_${{ inputs.kubepug-release }}_checksums.txt
+        shaCustom=$(sha256sum kubepug_linux_amd64.tar.gz | cut -d' ' -f1);
+        if grep -Fxq "$shaCustom  kubepug_linux_amd64.tar.gz" kubepug_${{ inputs.kubepug-release }}_checksums.txt
+        then
+          tar -zxvf kubepug_linux_amd64.tar.gz
+        else
+          echo "ERROR: SHA256sum for kubepug package version '${{ inputs.kubepug-release }}' does not match"
+          exit 1
+        fi
+
+        rm -f kubepug_*
+      shell: bash
+    - run:  echo "$HOME/.kubepug" >> $GITHUB_PATH
+      shell: bash
