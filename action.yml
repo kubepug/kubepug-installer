@@ -123,7 +123,7 @@ runs:
 
         log_info "Using cosign to verify signature of desired bom version"
         cosign verify-blob --certificate $KUBEPUG_CERT --signature $KUBEPUG_SIG \
-          --certificate-identity "https://github.com/rikatz/kubepug/.github/workflows/release.yml@refs/tags/v${{ inputs.kubepug-release }}" \
+          --certificate-identity "https://github.com/rikatz/kubepug/.github/workflows/release.yaml@refs/tags/v${{ inputs.kubepug-release }}" \
           --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ${desired_kubepug_filename}
         retVal=$?
         if [[ $retVal -eq 0 ]]; then
