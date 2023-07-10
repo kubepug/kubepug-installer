@@ -1,24 +1,16 @@
 name: test-kubepug
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
   test_kubepug_action:
     runs-on: ubuntu-latest
-    permissions:
-      actions: none
-      checks: none
-      contents: none
-      deployments: none
-      issues: none
-      packages: none
-      pull-requests: none
-      repository-projects: none
-      security-events: none
-      statuses: none
+    permissions: {}
     name: Install kubepug and test presence in path
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
     - name: Install kubepug
       uses: ./
     - name: Check install!
@@ -34,20 +26,10 @@ jobs:
 
   test_kubepug_action_wrong:
     runs-on: ubuntu-latest
-    permissions:
-      actions: none
-      checks: none
-      contents: none
-      deployments: none
-      issues: none
-      packages: none
-      pull-requests: none
-      repository-projects: none
-      security-events: none
-      statuses: none
+    permissions: {}
     name: Try to install a wrong kubepug
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
     - name: Install kubepug
       uses: ./
       with:
