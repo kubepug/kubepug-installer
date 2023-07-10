@@ -130,10 +130,10 @@ runs:
           if [[ ${desired_kubepug_filename} == *".zip"*  ]]; then
             7z x ${desired_kubepug_filename}
           else
-            tar -zxvf ${desired_kubepug_filename}
+            $SUDO tar -zxvf ${desired_kubepug_filename}
           fi
           $SUDO chmod +x kubepug
-          rm -f kubepug_*
+          $SUDO rm -f kubepug_*
           log_info "Installation complete!"
         else
           log_error "Unable to validate bom version: '${{ inputs.kubepug-release }}'"
