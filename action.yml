@@ -121,13 +121,17 @@ runs:
         KUBEPUG_CERT=https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}.pem
         KUBEPUG_SIG=https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}.sig
 
-        log_info "Using cosign to verify signature of desired bom version"
+        log_info "Using cosign to verify signature of desired kubepug version"
         cosign verify-blob --certificate $KUBEPUG_CERT --signature $KUBEPUG_SIG \
           --certificate-identity "https://github.com/rikatz/kubepug/.github/workflows/release.yaml@refs/tags/v${{ inputs.kubepug-release }}" \
           --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ${desired_kubepug_filename}
         retVal=$?
         if [[ $retVal -eq 0 ]]; then
-          tar -zxvf ${desired_kubepug_filename}
+          if [[ ${desired_kubepug_filename} == *".zip"*  ]]; then
+            7z x ${desired_kubepug_filename}
+          else
+            tar -zxvf ${desired_kubepug_filename}
+          fi
           $SUDO chmod +x kubepug
           rm -f kubepug_*
           log_info "Installation complete!"

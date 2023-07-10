@@ -29,6 +29,7 @@ jobs:
         else
           exit 0
         fi
+      shell: bash
 
   test_kubepug_action_custom_dir_root:
     runs-on: ubuntu-latest
