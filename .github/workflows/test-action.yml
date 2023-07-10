@@ -6,7 +6,13 @@ on:
 
 jobs:
   test_kubepug_action:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
     permissions: {}
     name: Install kubepug and test presence in path
     steps:
@@ -14,7 +20,7 @@ jobs:
     - name: Install kubepug
       uses: ./
     - name: Check install!
-      run: kubepug --version
+      run: kubepug version
     - name: Check root directory
       run: |
         if [[ $(git diff --stat) != '' ]]; then
@@ -23,6 +29,55 @@ jobs:
         else
           exit 0
         fi
+
+  test_kubepug_action_custom_dir_root:
+    runs-on: ubuntu-latest
+    permissions: {}
+    name: Install Custom kubepug and test presence in path with custom root dir
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - name: Install kubepug
+        uses: ./
+        with:
+          install-dir: /usr/bin
+          use-sudo: true
+      - name: Check install!
+        run: kubepug version
+      - name: Check install dir!
+        run: |
+          [[ $(dirname "$(which kubepug)") == /usr/bin ]]
+        shell: bash
+      - name: Check root directory
+        run: |
+          [[ -z $(git diff --stat) ]]
+        shell: bash
+
+  test_kubepug_actionn_custom_dir:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+    permissions: {}
+    name: Install Custom path kubepug and test presence in path
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - name: Install kubepug
+        uses: ./
+        with:
+          install-dir: "$HOME/.kubepugtest"
+      - name: Check install!
+        run: kubepug version
+      - name: Check install dir!
+        run: |
+          [[ $(dirname "$(which kubepug)") == "$HOME/.kubepugtest" ]]
+        shell: bash
+      - name: Check root directory
+        run: |
+          [[ -z $(git diff --stat) ]]
+        shell: bash
 
   test_kubepug_action_wrong:
     runs-on: ubuntu-latest
