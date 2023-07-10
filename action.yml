@@ -8,37 +8,141 @@ inputs:
   kubepug-release:
     description: 'Kubepug release version to use in the actions.'
     required: false
-    default: '1.2.2'
-
+    default: '1.5.0'
+  install-dir:
+    description: 'Where to install the Kubepug binary'
+    required: false
+    default: '$HOME/.kubepug'
+  use-sudo:
+    description: 'set to true if install-dir location requires sudo privs'
+    required: false
+    default: 'false'
 runs:
   using: "composite"
   steps:
-    - run: |
-        trap "popd" EXIT
+    - uses: sigstore/cosign-installer@6e04d228eb30da1757ee4e1dd75a0ec73a653e06 # v3.1.1
+      with:
+        install-dir: ${{ inputs.install-dir }}
+        use-sudo: ${{ inputs.use-sudo }}
+    - shell: bash
+      run: |
+        #!/bin/bash
+        # bom install script
+        shopt -s expand_aliases
+        if [ -z "$NO_COLOR" ]; then
+          alias log_info="echo -e \"\033[1;32mINFO\033[0m:\""
+          alias log_error="echo -e \"\033[1;31mERROR\033[0m:\""
+        else
+          alias log_info="echo \"INFO:\""
+          alias log_error="echo \"ERROR:\""
+        fi
+        set -e
 
-        mkdir -p $HOME/.kubepug
-        pushd $HOME/.kubepug
+        mkdir -p ${{ inputs.install-dir }}
+
+        trap "popd >/dev/null" EXIT
+
+        pushd ${{ inputs.install-dir }} > /dev/null
+        bom_executable_name='bom'
+        case ${{ runner.os }} in
+          Linux)
+            case ${{ runner.arch }} in
+              X64)
+                desired_kubepug_filename='kubepug_linux_amd64.tar.gz'
+                ;;
+
+              ARM)
+                desired_kubepug_filename='kubepug_linux_arm.tar.gz'
+                ;;
+
+              ARM64)
+                desired_kubepug_filename='kubepug_linux_arm64.tar.gz'
+                ;;
+
+              *)
+                log_error "unsupported architecture $arch"
+                exit 1
+                ;;
+            esac
+            ;;
+
+          macOS)
+            case ${{ runner.arch }} in
+              X64)
+                desired_kubepug_filename='kubepug_darwin_amd64.tar.gz'
+                ;;
+
+              ARM64)
+                desired_kubepug_filename='kubepug_darwin_arm64.tar.gz'
+                ;;
+
+              *)
+                log_error "unsupported architecture $arch"
+                exit 1
+                ;;
+            esac
+            ;;
+
+          Windows)
+            case ${{ runner.arch }} in
+              X64)
+                desired_kubepug_filename='kubepug_windows_amd64.zip'
+                bom_executable_name=bom.exe
+                ;;
+              *)
+                log_error "unsupported architecture $arch"
+                exit 1
+                ;;
+            esac
+            ;;
+          *)
+            log_error "unsupported architecture $arch"
+            exit 1
+            ;;
+        esac
+
+        SUDO=
+        if "${{ inputs.use-sudo }}" == "true" && command -v sudo >/dev/null; then
+          SUDO=sudo
+        fi
 
         semver='^([0-9]+\.){0,2}(\*|[0-9]+)$'
         if [[ ${{ inputs.kubepug-release }} =~ $semver ]]; then
-          echo "INFO: Custom Kubepug Version ${{ inputs.kubepug-release }}"
+          log_info "Custom bom version '${{ inputs.kubepug-release }}' requested"
         else
-          echo "ERROR: Unable to validate Kubepug version: '${{ inputs.kubepug-release }}'"
+          log_error "Unable to validate requested bom version: '${{ inputs.kubepug-release }}'"
           exit 1
         fi
 
-        wget https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/kubepug_linux_amd64.tar.gz
-        wget https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/kubepug_${{ inputs.kubepug-release }}_checksums.txt
-        shaCustom=$(sha256sum kubepug_linux_amd64.tar.gz | cut -d' ' -f1);
-        if grep -Fxq "$shaCustom  kubepug_linux_amd64.tar.gz" kubepug_${{ inputs.kubepug-release }}_checksums.txt
-        then
-          tar -zxvf kubepug_linux_amd64.tar.gz
+        # Download custom bom
+        log_info "Downloading platform-specific version '${{ inputs.kubepug-release }}' of Kubepug...\n      https://github.com/kubernetes-sigs/bom/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}"
+        $SUDO curl -sL https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename} -o ${desired_kubepug_filename}
+
+        KUBEPUG_CERT=https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}.pem
+        KUBEPUG_SIG=https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}.sig
+
+        log_info "Using cosign to verify signature of desired kubepug version"
+        cosign verify-blob --certificate $KUBEPUG_CERT --signature $KUBEPUG_SIG \
+          --certificate-identity "https://github.com/rikatz/kubepug/.github/workflows/release.yaml@refs/tags/v${{ inputs.kubepug-release }}" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ${desired_kubepug_filename}
+        retVal=$?
+        if [[ $retVal -eq 0 ]]; then
+          if [[ ${desired_kubepug_filename} == *".zip"*  ]]; then
+            7z x ${desired_kubepug_filename}
+          else
+            $SUDO tar -zxvf ${desired_kubepug_filename}
+          fi
+          $SUDO chmod +x kubepug
+          $SUDO rm -f kubepug_*
+          log_info "Installation complete!"
         else
-          echo "ERROR: SHA256sum for kubepug package version '${{ inputs.kubepug-release }}' does not match"
+          log_error "Unable to validate bom version: '${{ inputs.kubepug-release }}'"
           exit 1
         fi
 
-        rm -f kubepug_*
+    - if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      run: echo "${{ inputs.install-dir }}" >> $GITHUB_PATH
       shell: bash
-    - run:  echo "$HOME/.kubepug" >> $GITHUB_PATH
-      shell: bash
+    - if: ${{ runner.os == 'Windows' }}
+      run: echo "${{ inputs.install-dir }}" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      shell: pwsh
