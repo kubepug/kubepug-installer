@@ -16,7 +16,7 @@ jobs:
     permissions: {}
     name: Install kubepug and test presence in path
     steps:
-    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+    - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
     - name: Install kubepug
       uses: ./
     - name: Check install!
@@ -36,7 +36,7 @@ jobs:
     permissions: {}
     name: Install Custom kubepug and test presence in path with custom root dir
     steps:
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
       - name: Install kubepug
         uses: ./
         with:
@@ -64,7 +64,7 @@ jobs:
     permissions: {}
     name: Install Custom path kubepug and test presence in path
     steps:
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
       - name: Install kubepug
         uses: ./
         with:
@@ -85,7 +85,7 @@ jobs:
     permissions: {}
     name: Try to install a wrong kubepug
     steps:
-    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+    - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
     - name: Install kubepug
       uses: ./
       with:
