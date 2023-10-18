@@ -8,7 +8,7 @@ inputs:
   kubepug-release:
     description: 'Kubepug release version to use in the actions.'
     required: false
-    default: '1.5.0'
+    default: '1.7.1'
   install-dir:
     description: 'Where to install the Kubepug binary'
     required: false
