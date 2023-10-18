@@ -8,7 +8,7 @@ inputs:
   kubepug-release:
     description: 'Kubepug release version to use in the actions.'
     required: false
-    default: '1.5.0'
+    default: '1.7.1'
   install-dir:
     description: 'Where to install the Kubepug binary'
     required: false
@@ -115,15 +115,15 @@ runs:
         fi
 
         # Download custom bom
-        log_info "Downloading platform-specific version '${{ inputs.kubepug-release }}' of Kubepug...\n      https://github.com/kubernetes-sigs/bom/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}"
-        $SUDO curl -sL https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename} -o ${desired_kubepug_filename}
+        log_info "Downloading platform-specific version '${{ inputs.kubepug-release }}' of Kubepug...\n      https://github.com/kubepug/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}"
+        $SUDO curl -sL https://github.com/kubepug/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename} -o ${desired_kubepug_filename}
 
-        KUBEPUG_CERT=https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}.pem
-        KUBEPUG_SIG=https://github.com/rikatz/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}.sig
+        KUBEPUG_CERT=https://github.com/kubepug/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}.pem
+        KUBEPUG_SIG=https://github.com/kubepug/kubepug/releases/download/v${{ inputs.kubepug-release }}/${desired_kubepug_filename}.sig
 
         log_info "Using cosign to verify signature of desired kubepug version"
         cosign verify-blob --certificate $KUBEPUG_CERT --signature $KUBEPUG_SIG \
-          --certificate-identity "https://github.com/rikatz/kubepug/.github/workflows/release.yaml@refs/tags/v${{ inputs.kubepug-release }}" \
+          --certificate-identity "https://github.com/kubepug/kubepug/.github/workflows/release.yaml@refs/tags/v${{ inputs.kubepug-release }}" \
           --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ${desired_kubepug_filename}
         retVal=$?
         if [[ $retVal -eq 0 ]]; then

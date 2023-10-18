@@ -1,15 +1,15 @@
 # kubepug-installer GitHub Action
 
-This action enables you to install and use [kubepug](https://github.com/rikatz/kubepug) in your GitHub action workflow.
+This action enables you to install and use [kubepug](https://github.com/kubepug/kubepug) in your GitHub action workflow.
 
 ## Usage
 
 Add the following entry to your Github workflow YAML file:
 
 ```yaml
-uses: cpanato/kubepug-installer@main
+uses: kubepug/kubepug-installer@main
 with:
-  kubepug-release: '1.2.2' # optional
+  kubepug-release: '1.7.1' # optional
 ```
 
 Example using a pinned version:
@@ -34,9 +34,9 @@ jobs:
     name: Install kubepug and test presence in path
     steps:
       - name: Install kubepug
-        uses: cpanato/kubepug-installer@main
+        uses: kubepug/kubepug-installer@main
         with:
-          kubepug-release: '1.2.2'
+          kubepug-release: '1.7.1'
       - name: Check install!
         run: kubepug --version
 ```
@@ -63,7 +63,7 @@ jobs:
     name: Install kubepug and test presence in path
     steps:
       - name: Install kubepug
-        uses: cpanato/kubepug-installer@main
+        uses: kubepug/kubepug-installer@main
       - name: Check install!
         run: kubepug --version
 ```
@@ -110,7 +110,7 @@ jobs:
         id: install
 
       - name: Install kubepug
-        uses: cpanato/kubepug-installer@main
+        uses: kubepug/kubepug-installer@main
 
       - name: Run Kubepug with your Helm Charts Repository
         run: |
