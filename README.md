@@ -63,7 +63,7 @@ jobs:
     name: Install kubepug and test presence in path
     steps:
       - name: Install kubepug
-        uses: cpanato/kubepug-installer@main
+        uses: kubepug/kubepug-installer@main
       - name: Check install!
         run: kubepug --version
 ```
@@ -110,7 +110,7 @@ jobs:
         id: install
 
       - name: Install kubepug
-        uses: cpanato/kubepug-installer@main
+        uses: kubepug/kubepug-installer@main
 
       - name: Run Kubepug with your Helm Charts Repository
         run: |
