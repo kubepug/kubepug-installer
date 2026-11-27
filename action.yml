@@ -20,7 +20,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+    - uses: sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab # v4.1.4
       with:
         install-dir: ${{ inputs.install-dir }}
         use-sudo: ${{ inputs.use-sudo }}
